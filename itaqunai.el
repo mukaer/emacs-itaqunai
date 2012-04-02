@@ -2,8 +2,8 @@
 
 ;; Copyright (C) 2012
 ;; (mukaer atmark gmail period com)
-;; Version: 0.0.1
-;; Last-Updated: 2012-04-02 17:00:00
+;; Version: 0.0.2
+;; Last-Updated: 2012-04-02 19:15:00
 ;; URL: https://github.com/mukaer
 
 ;; This file is NOT a part of GNU Emacs.
@@ -58,28 +58,28 @@
 
 ;;; Change log:
 ;;
+;; * 02 Apr 2012:
+;;   * mukaer:
+;;     * version: 0.0.2
+;;
 ;; * Init:
 ;;   * mukaer:
 ;;     * version: 0.0.1
 
-
-
-;;; Code:
-
-
-
 (defvar itaqunai-tmp-script-file
-  "/tmp/itaqunai-tmp-script-file")
+   "/tmp/itaqunai-tmp-script-file")
 
 
 (defun itaqunai-exec ()
   (interactive)
-  ;mark set check
+  ;mark set 判定
   (if mark-active
       ;true
       (itaqunai-multiliner)
+
     ;false
-    (itaqunai-oneliner)))
+    (itaqunai-oneliner))
+)
 ; M-: (itaqunai-exec)
 ; mark set
 ; M-: (itaqunai-exec)
@@ -87,42 +87,46 @@
 
 
 (defun itaqunai-oneliner ()
-  (setq beg (itaqunai-begin-point))
-  (setq end (itaqunai-end-point))
+  (let (
+	(beg (itaqunai-begin-point))
+	(end (itaqunai-end-point))
+	)
 
   (if (not (eq beg end ))
 	  (progn
 	    (itaqunai-make-script   beg end )
 	    (itaqunai-insert-result)
-	    (goto-char end))))
+	    (goto-char end)))))
 ;itaqunai-oneliner
 
 
 
 (defun itaqunai-multiliner ()
-  (setq beg (itaqunai-multi-begin-point))
-  (setq end (itaqunai-multi-end-point))
+  (let (
+	(beg (itaqunai-multi-begin-point))
+	(end (itaqunai-multi-end-point))
+	)
 
   (goto-char end)
   (itaqunai-make-script   beg end)
   (itaqunai-insert-result)
-  (goto-char end))
+  (goto-char end)))
 ; mark set
 ; M-x itaqunai-multiliner
 
 
 
 (defun itaqunai-make-script(start end )
+  (let ((curbuf (current-buffer)))
 
-  (setq curbuf (current-buffer))
-  ;バッファ位置保持し、下記フォーム実行
-  (with-temp-buffer
+    ;バッファ位置保持し、下記フォーム実行
+    (with-temp-buffer
 
-    ;現在のbufferに内容入れる  curbufのstart end間の内容
-    (insert-buffer-substring curbuf start end)
+      ;現在のbufferに内容入れる  curbufのstart end間の内容
+      (insert-buffer-substring curbuf start end)
 
-    ;buffer 内容をファイルに保存
-    (write-region (point-min) (point-max) itaqunai-tmp-script-file )))
+      ;buffer 内容をファイルに保存
+      (write-region (point-min) (point-max) itaqunai-tmp-script-file ))))
 
 ;(itaqunai-make-script 1  20)
 
@@ -139,20 +143,20 @@
 
 ;行頭 point取得
 (defun itaqunai-begin-point ()
-  (setq now-point (point))
-  (beginning-of-line)
-  (setq beg-point (point))
-  (goto-char now-point)
-  beg-point)
+  (let (( now-point (point)))
+    (beginning-of-line)
+    (let ((beg-point (point)))
+      (goto-char now-point)
+      beg-point)))
 
 
 ;行末 point取得
 (defun itaqunai-end-point ()
-  (setq now-point (point))
-  (end-of-line)
-  (setq end-point (point))
-  (goto-char now-point)
-  end-point)
+  (let ((now-point (point)) )
+    (end-of-line)
+    (let ((end-point (point)) )
+      (goto-char now-point)
+      end-point)))
 
 ;multiline先頭 point取得
 (defun itaqunai-multi-begin-point ()
