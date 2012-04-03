@@ -2,8 +2,8 @@
 
 ;; Copyright (C) 2012
 ;; (mukaer atmark gmail period com)
-;; Version: 0.0.3
-;; Last-Updated: 2012-04-03 20:30:00
+;; Version: 0.0.4
+;; Last-Updated: 2012-04-03 22:00:00
 ;; URL: https://github.com/mukaer
 
 ;; This file is NOT a part of GNU Emacs.
@@ -81,29 +81,39 @@
 		"footer"	      ""
 		"footer_after_search" ""
 		)
+	      sh-mode '(
+			"command" "bash"
+			)
+	      perl-mode '("command" "perl"
+			 )
+
+	      php-mode '("command" "php -f"
+			 "header" "<?php"
+			 "footer" "?>"
+			 )
 
 	      ruby-mode '(
-		  "command" "/usr/local/bin/ruby"
+		  "command" "ruby"
 		  "header"    ""
 		  "footer"    "")
 
-		php-mode '(
-			   "command" "/usr/loca/bin/php"
-			   "header"    ""
-			   "footer"    ""
-			   )
+	      python-mode '(
+			 "command" "python"
+			 )
 
-		js2-mode '(
-			   "command" "/usr/loca/bin/node"
-			   "header"    ""
-			   "footer"    ""
-			   )
+	      js-mode '(
+			 "command" "js"
+			 )
 
-		sh-mode '(
-			   "command" "/bin/bash"
-			   "header"    ""
-			   "footer"    ""
-			   ))))
+	      js2-mode '(
+			 "command" "node"
+			 )
+
+	      markdown-mode '(
+			 "command" "Markdown.pl"
+			 )
+
+)))
 
 
 (defun itaqunai-exec ()
@@ -154,7 +164,8 @@
 
 (defun itaqunai-make-script(start end )
   (let ((curbuf (current-buffer))
-	(mode major-mode)
+	(header  (get-hash itaqunai-config  major-mode "header" ))
+	(footer  (get-hash itaqunai-config  major-mode "footer" ))
 	(h_befor (itaqunai-code-search "haeder_befor_search"))
 	(h_after (itaqunai-code-search "header_after_search"))
 	(f_befor (itaqunai-code-search "footer_befor_search"))
@@ -167,8 +178,7 @@
       (if  h_befor  (insert h_befor))
 
       ;header
-      (let ((cont (get-hash itaqunai-config  mode "header" )))
-	(if (> 0 (length cont)) (insert cont)))
+      (if  header  (insert header "\n"))
 
       ;h_after
       (if  h_after  (insert h_after))
@@ -182,8 +192,7 @@
       (if  f_befor  (insert f_befor))
 
       ;footer
-      (let ((cont (get-hash itaqunai-config  mode "footer" )))
-	(if (> 0 (length cont)) (insert cont)))
+      (if  footer  (insert footer "\n"))
 
       ;f_after
       (if  f_after  (insert f_after))
