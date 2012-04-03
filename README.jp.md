@@ -1,5 +1,5 @@
 # Interaction Quick Native Interpreter: itaqunai ～いたくない～
-emacsの編集画面でワンライナーを実行し結果を貼り付け
+emacsの編集画面でワンライナーを実行し結果を貼り付けができます。
 
 lisp-interaction-modeの機能劣化版みたいなものです。
 
@@ -61,25 +61,31 @@ lisp-interaction-modeの機能劣化版みたいなものです。
 
 ## Installation
 
-1. itaqunai.elのロードパスへの設置
+1. ロードパスへの設置
 
-         https://github.com/emacs-itaqunai/itaqunai.el
+         https://raw.github.com/mukaer/emacs-hash-lib/master/hash-lib.el
+         https://raw.github.com/mukaer/emacs-itaqunai/master/itaqunai.el
 
 2. `.emacs`の記載
 
          (require 'itaqunai)
          
          ;各種パスの指定
-          (setq itaqunai-config 
-            	(append-hash itaqunai-config 
-            	   (list-to-hash 
-            		'(
-            		  ruby-mode '("command" "~/.rbenv/shims/ruby"
-            			  "header"	 ""
-            			  "sarch_ins"	""
-            			  "footer"	 ""
-            			  )))))
-         
+         (setq itaqunai-config 
+           (append-hash itaqunai-config 
+           	   (list-to-hash 
+           		'(
+           		  ruby-mode '("command" "~/.rbenv/shims/ruby"
+           			  "header_befor_search"	 "^[ \t]*\\(require\\)\s+\\('\\|\"\\)\\(\\w+\\)\\('\\|\"\\)"
+           			  "header"	 ""
+           			  "footer"	 ""
+           			  )
+           			php-mode  '("header_befor_search" '("1" "^[ \t]*\\(require\\)\s+\\('\\|\"\\)\\(\\w+\\)\\('\\|\"\\)"
+           						   "2" "^[ \t]*\\(include\\)\s+\\('\\|\"\\)\\(\\w+\\)\\('\\|\"\\)"
+           						   )
+           					)
+           			)))
+                
          ;一時ファイルの作成場所指定
          (defvar itaqunai-tmp-script-file
            "/dev/shm/itaqunai-tmp-script-file")
@@ -95,16 +101,16 @@ lisp-interaction-modeの機能劣化版みたいなものです。
                      (define-key ruby-mode-map (kbd "C-j") 'itaqunai-exec)
              ))
 
+## FAQ
+* 無限ループで固まった  
+    `C-g`で抜けましょう。
 
-## Todo
-* 指定の記述を挿入する  
-    `#!/bin/bash`などを行頭にする
-* 指定の記述がある行を勝手に取ってくる。  
-    ruby `require 'webrick'`  php `include 'hogehoge.inc'`
-* ブロックなど簡単に取り込めるように。   
-    rubyだと `if end`  php `if{ }`
-* 実行時間の制限をつける？  
-    スクリプトに埋め込み？ phpだと limit timeを関数で指定できたはず・・・
-* 変数などを格納した場合保持する？  
-    その際 print系は削除する。　あとはエラー処理が問題？
+
+## todo 
+* 'C-u (universal-argument)' に対応
 * major-mode 化？
+* 変数などを格納した場合保持する？  
+    その際 print系は削除する。　あとはエラー処理が必要かなぁ・・・
+* ↑の機能で、ブロックなど簡単に取り込めるように？  
+    rubyだと `if end`  php `if{ }`
+

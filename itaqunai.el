@@ -3,7 +3,7 @@
 ;; Copyright (C) 2012
 ;; (mukaer atmark gmail period com)
 ;; Version: 0.0.3
-;; Last-Updated: 2012-04-02 19:15:00
+;; Last-Updated: 2012-04-03 20:30:00
 ;; URL: https://github.com/mukaer
 
 ;; This file is NOT a part of GNU Emacs.
@@ -21,25 +21,33 @@
 ;; GNU General Public License for more details.
 
 ;;; Installation:
-;; Copy hash-lib.el to your load-path
-;; URL: http://github.com/mukaer.com/emacs-hash-lib/hash-lib.el
+;;
+;; 1 Copy hash-lib.el to your load-path
+;;    URL: https://raw.github.com/mukaer/emacs-hash-lib/master/hash-lib.el
 ;;
 ;;
-;; Copy itaqunai.el to your load-path and add to your ~/.emacs
+;; 2 Copy itaqunai.el to your load-path and add to your ~/.emacs
+;;    URL: https://raw.github.com/mukaer/emacs-itaqunai/master/itaqunai.el
 ;;
 ;;   (require 'itaqunai)
+;;
 
 ;;; Customize:
 ;;
 ;;  (setq itaqunai-config 
-;;        (append-hash itaqunai-config 
-;;   		   (list-to-hash 
-;;   		    '(
-;;   		      ruby-mode '("command" "~/.rbenv/shims/ruby"
-;;   				  "header"   ""
-;;   				  "sarch_ins"   ""
-;;   				  "footer"   ""
-;;   				  )))))
+;; 	(append-hash itaqunai-config 
+;; 		   (list-to-hash 
+;; 		    '(
+;; 		      ruby-mode '("command" "~/.rbenv/shims/ruby"
+;; 				  "header_befor_search"	 "^[ \t]*\\(require\\)\s+\\('\\|\"\\)\\(\\w+\\)\\('\\|\"\\)"
+;; 				  "header"   ""
+;; 				  "footer"   ""
+;; 				  )
+;; 				php-mode  '("header_befor_search" '("1" "^[ \t]*\\(require\\)\s+\\('\\|\"\\)\\(\\w+\\)\\('\\|\"\\)"
+;; 							   "2" "^[ \t]*\\(include\\)\s+\\('\\|\"\\)\\(\\w+\\)\\('\\|\"\\)"
+;; 							   )
+;; 					    )
+;; 				)))
 ;;  
 ;;
 ;;    (setq itaqunai-tmp-script-file
@@ -54,22 +62,10 @@
 
 
 
-
-;;; Change log:
-;;
-;; * 02 Apr 2012:
-;;   * mukaer:
-;;     * version: 0.0.2
-;;
-;; * Init:
-;;   * mukaer:
-;;     * version: 0.0.1
-
 ;;; Code:
 
 (require 'cl)
 (require 'hash-lib)
-
 
 (defvar itaqunai-tmp-script-file
    "/tmp/itaqunai-tmp-script-file")
@@ -77,38 +73,37 @@
 (defvar itaqunai-config
    (list-to-hash 
     '(
-      ruby-mode '(
+      default '("command" "cat"
+		"haeder_befor_search" ""
+		"header"              ""
+		"haeder_after_search" ""
+		"footer_befor_search" ""
+		"footer"	      ""
+		"footer_after_search" ""
+		)
+
+	      ruby-mode '(
 		  "command" "/usr/local/bin/ruby"
 		  "header"    ""
-		  "sarch_ins" ""
 		  "footer"    "")
 
 		php-mode '(
 			   "command" "/usr/loca/bin/php"
 			   "header"    ""
-			   "sarch_ins" ""
 			   "footer"    ""
 			   )
 
 		js2-mode '(
 			   "command" "/usr/loca/bin/node"
 			   "header"    ""
-			   "sarch_ins" ""
 			   "footer"    ""
 			   )
 
 		sh-mode '(
 			   "command" "/bin/bash"
 			   "header"    ""
-			   "sarch_ins" ""
 			   "footer"    ""
-			   )
-
-		default '("command" "cat"
-			  )
-
-)))
-
+			   ))))
 
 
 (defun itaqunai-exec ()
@@ -159,20 +154,39 @@
 
 (defun itaqunai-make-script(start end )
   (let ((curbuf (current-buffer))
-	(mode major-mode))
+	(mode major-mode)
+	(h_befor (itaqunai-code-search "haeder_befor_search"))
+	(h_after (itaqunai-code-search "header_after_search"))
+	(f_befor (itaqunai-code-search "footer_befor_search"))
+	(f_after (itaqunai-code-search "footer_after_search"))
+	)
 
     ;バッファ位置保持し、下記フォーム実行
     (with-temp-buffer
+      ;h_befor
+      (if  h_befor  (insert h_befor))
+
       ;header
       (let ((cont (get-hash itaqunai-config  mode "header" )))
 	(if (> 0 (length cont)) (insert cont)))
 
+      ;h_after
+      (if  h_after  (insert h_after))
+
+
       ;現在のbufferに内容入れる  curbufのstart end間の内容
       (insert-buffer-substring curbuf start end)
+
+
+      ;f_befor
+      (if  f_befor  (insert f_befor))
 
       ;footer
       (let ((cont (get-hash itaqunai-config  mode "footer" )))
 	(if (> 0 (length cont)) (insert cont)))
+
+      ;f_after
+      (if  f_after  (insert f_after))
 
       ;buffer 内容をファイルに保存
       (write-region (point-min) (point-max) itaqunai-tmp-script-file ))))
@@ -223,5 +237,35 @@
     (if mode
 	mode
       (get-hash itaqunai-config 'default "command"))))
+
+
+(defun itaqunai-code-search (option)
+  (let (
+	(search_ins (get-hash itaqunai-config major-mode option)))
+    (if search_ins
+	(if (typep search_ins 'hash-table)
+	    ;true
+	    (let (index)
+	      (loop for key being the hash-keys of search_ins using (hash-values val)
+		    do (push (itaqunai-re-search val) index))
+ 
+	      (mapconcat 'concat (nreverse index) "\n")
+	      )
+ 
+	  ;false
+	  (itaqunai-re-search search_ins)))))
+
+(defun itaqunai-re-search (regxp)
+
+  (let (index )
+    (save-excursion
+      (goto-char (point-min))
+      (while
+	  (re-search-forward regxp (point-max) t)
+	(push  (match-string-no-properties 0)  index))
+
+      (mapconcat 'concat (nreverse index) "\n")
+
+)))
 
 (provide 'itaqunai)
