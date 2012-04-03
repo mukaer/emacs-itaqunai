@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2012
 ;; (mukaer atmark gmail period com)
-;; Version: 0.0.2
+;; Version: 0.0.3
 ;; Last-Updated: 2012-04-02 19:15:00
 ;; URL: https://github.com/mukaer
 
@@ -21,6 +21,9 @@
 ;; GNU General Public License for more details.
 
 ;;; Installation:
+;; Copy hash-lib.el to your load-path
+;; URL: http://github.com/mukaer.com/emacs-hash-lib/hash-lib.el
+;;
 ;;
 ;; Copy itaqunai.el to your load-path and add to your ~/.emacs
 ;;
@@ -28,20 +31,16 @@
 
 ;;; Customize:
 ;;
-;;  (defun itaqunai-program-path ()
-;;    (cond
-;;      ((string= major-mode "ruby-mode")
-;;       "~/.rbenv/shims/ruby")
-;;      ((string= major-mode "php-mode")
-;;       "/usr/local/bin/php")
-;;      ((string= major-mode "js2-mode")
-;;       "/usr/local/bin/node")
-;;      ((string= major-mode "cperl-mode")
-;;       "/usr/bin/perl")
-;;      ((string= major-mode "sh-mode")
-;;       "bash")
-;;      (t "cat")))
-;;
+;;  (setq itaqunai-config 
+;;        (append-hash itaqunai-config 
+;;   		   (list-to-hash 
+;;   		    '(
+;;   		      ruby-mode '("command" "~/.rbenv/shims/ruby"
+;;   				  "header"   ""
+;;   				  "sarch_ins"   ""
+;;   				  "footer"   ""
+;;   				  )))))
+;;  
 ;;
 ;;    (setq itaqunai-tmp-script-file
 ;;      "/dev/shm/itaqunai-tmp-script-file")
@@ -66,13 +65,55 @@
 ;;   * mukaer:
 ;;     * version: 0.0.1
 
+;;; Code:
+
+(require 'cl)
+(require 'hash-lib)
+
+
 (defvar itaqunai-tmp-script-file
    "/tmp/itaqunai-tmp-script-file")
+
+(defvar itaqunai-config
+   (list-to-hash 
+    '(
+      ruby-mode '(
+		  "command" "/usr/local/bin/ruby"
+		  "header"    ""
+		  "sarch_ins" ""
+		  "footer"    "")
+
+		php-mode '(
+			   "command" "/usr/loca/bin/php"
+			   "header"    ""
+			   "sarch_ins" ""
+			   "footer"    ""
+			   )
+
+		js2-mode '(
+			   "command" "/usr/loca/bin/node"
+			   "header"    ""
+			   "sarch_ins" ""
+			   "footer"    ""
+			   )
+
+		sh-mode '(
+			   "command" "/bin/bash"
+			   "header"    ""
+			   "sarch_ins" ""
+			   "footer"    ""
+			   )
+
+		default '("command" "cat"
+			  )
+
+)))
+
 
 
 (defun itaqunai-exec ()
   (interactive)
-  ;mark set 判定
+  ;mark set
   (if mark-active
       ;true
       (itaqunai-multiliner)
@@ -117,17 +158,24 @@
 
 
 (defun itaqunai-make-script(start end )
-  (let ((curbuf (current-buffer)))
+  (let ((curbuf (current-buffer))
+	(mode major-mode))
 
     ;バッファ位置保持し、下記フォーム実行
     (with-temp-buffer
+      ;header
+      (let ((cont (get-hash itaqunai-config  mode "header" )))
+	(if (> 0 (length cont)) (insert cont)))
 
       ;現在のbufferに内容入れる  curbufのstart end間の内容
       (insert-buffer-substring curbuf start end)
 
+      ;footer
+      (let ((cont (get-hash itaqunai-config  mode "footer" )))
+	(if (> 0 (length cont)) (insert cont)))
+
       ;buffer 内容をファイルに保存
       (write-region (point-min) (point-max) itaqunai-tmp-script-file ))))
-
 ;(itaqunai-make-script 1  20)
 
 
@@ -170,5 +218,10 @@
       (point)
     (mark)))
 
+(defun itaqunai-program-path ()
+  (let ( ( mode  (get-hash itaqunai-config  major-mode "command" )))
+    (if mode
+	mode
+      (get-hash itaqunai-config 'default "command"))))
 
 (provide 'itaqunai)

@@ -70,18 +70,15 @@ lisp-interaction-modeの機能劣化版みたいなものです。
          (require 'itaqunai)
          
          ;各種パスの指定
-         (defun itaqunai-program-path ()
-           (cond 
-             ((string= major-mode "ruby-mode")
-                  "~/.rbenv/shims/ruby")
-             ((string= major-mode "php-mode")
-                  "/usr/local/bin/php")
-             ((string= major-mode "js2-mode")
-                  "/usr/local/bin/node")
-             ((string= major-mode "cperl-mode")
-                  "/usr/bin/perl")
-             (t "cat")
-              ))
+          (setq itaqunai-config 
+            	(append-hash itaqunai-config 
+            	   (list-to-hash 
+            		'(
+            		  ruby-mode '("command" "~/.rbenv/shims/ruby"
+            			  "header"	 ""
+            			  "sarch_ins"	""
+            			  "footer"	 ""
+            			  )))))
          
          ;一時ファイルの作成場所指定
          (defvar itaqunai-tmp-script-file
