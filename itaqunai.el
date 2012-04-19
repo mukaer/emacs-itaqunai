@@ -2,8 +2,8 @@
 
 ;; Copyright (C) 2012
 ;; (mukaer atmark gmail period com)
-;; Version: 0.0.4
-;; Last-Updated: 2012-04-03 22:00:00
+;; Version: 0.0.5
+;; Last-Updated: 2012-04-19 19:30:00
 ;; URL: https://github.com/mukaer
 
 ;; This file is NOT a part of GNU Emacs.
@@ -74,9 +74,9 @@
    (list-to-hash 
     '(
       default '("command" "cat"
-		"haeder_befor_search" ""
+		"header_befor_search" ""
 		"header"              ""
-		"haeder_after_search" ""
+		"header_after_search" ""
 		"footer_befor_search" ""
 		"footer"	      ""
 		"footer_after_search" ""
@@ -166,7 +166,7 @@
   (let ((curbuf (current-buffer))
 	(header  (get-hash itaqunai-config  major-mode "header" ))
 	(footer  (get-hash itaqunai-config  major-mode "footer" ))
-	(h_befor (itaqunai-code-search "haeder_befor_search"))
+	(h_befor (itaqunai-code-search "header_befor_search"))
 	(h_after (itaqunai-code-search "header_after_search"))
 	(f_befor (itaqunai-code-search "footer_befor_search"))
 	(f_after (itaqunai-code-search "footer_after_search"))
@@ -175,13 +175,13 @@
     ;バッファ位置保持し、下記フォーム実行
     (with-temp-buffer
       ;h_befor
-      (if  h_befor  (insert h_befor))
+      (if  h_befor  (insert h_befor "\n"))
 
       ;header
       (if  header  (insert header "\n"))
 
       ;h_after
-      (if  h_after  (insert h_after))
+      (if  h_after  (insert h_after "\n"))
 
 
       ;現在のbufferに内容入れる  curbufのstart end間の内容
@@ -189,13 +189,13 @@
 
 
       ;f_befor
-      (if  f_befor  (insert f_befor))
+      (if  f_befor  (insert f_befor "\n"))
 
       ;footer
       (if  footer  (insert footer "\n"))
 
       ;f_after
-      (if  f_after  (insert f_after))
+      (if  f_after  (insert f_after "\n"))
 
       ;buffer 内容をファイルに保存
       (write-region (point-min) (point-max) itaqunai-tmp-script-file ))))
@@ -265,16 +265,15 @@
 	  (itaqunai-re-search search_ins)))))
 
 (defun itaqunai-re-search (regxp)
+  (if (> (length regxp) 0)
+      (let (index )
+	(save-excursion
+	  (goto-char (point-min))
+	  (while
+	      (re-search-forward regxp (point-max) t)
+	    (push  (match-string-no-properties 0)  index))
 
-  (let (index )
-    (save-excursion
-      (goto-char (point-min))
-      (while
-	  (re-search-forward regxp (point-max) t)
-	(push  (match-string-no-properties 0)  index))
-
-      (mapconcat 'concat (nreverse index) "\n")
-
-)))
+	  (mapconcat 'concat (nreverse index) "\n")
+))))
 
 (provide 'itaqunai)
