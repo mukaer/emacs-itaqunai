@@ -2,8 +2,8 @@
 
 ;; Copyright (C) 2012
 ;; (mukaer atmark gmail period com)
-;; Version: 0.0.5
-;; Last-Updated: 2012-04-19 19:30:00
+;; Version: 0.0.6
+;; Last-Updated: 2024-05-14 14:00
 ;; URL: https://github.com/mukaer
 
 ;; This file is NOT a part of GNU Emacs.
@@ -61,11 +61,10 @@
 ;;     ))
 
 
-
 ;;; Code:
 
-(require 'cl)
-(require 'hash-lib)
+(use-package cl-lib)
+(use-package hash-lib)
 
 (defvar itaqunai-tmp-script-file
    "/tmp/itaqunai-tmp-script-file")
@@ -243,7 +242,7 @@
         (if (typep search_ins 'hash-table)
             ;; true
             (let (index)
-              (loop for key being the hash-keys of search_ins using (hash-values val)
+              (cl-loop for key being the hash-keys of search_ins using (hash-values val)
                     do (push (itaqunai-re-search val) index))
 
               (mapconcat 'concat (nreverse index) "\n"))
