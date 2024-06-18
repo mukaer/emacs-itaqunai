@@ -2,8 +2,8 @@
 
 ;; Copyright (C) 2012
 ;; (mukaer atmark gmail period com)
-;; Version: 0.0.6
-;; Last-Updated: 2024-05-14 14:00
+;; Version: 0.0.7
+;; Last-Updated: 2024-06-18 19:00
 ;; URL: https://github.com/mukaer
 
 ;; This file is NOT a part of GNU Emacs.
@@ -63,8 +63,8 @@
 
 ;;; Code:
 
-(use-package cl-lib)
-(use-package hash-lib)
+(require 'cl-lib)
+(require 'hash-lib)
 
 (defvar itaqunai-tmp-script-file
    "/tmp/itaqunai-tmp-script-file")
@@ -239,7 +239,7 @@
   (let (
         (search_ins (get-hash itaqunai-config major-mode option)))
     (if search_ins
-        (if (typep search_ins 'hash-table)
+        (if (hash-table-p search_ins )
             ;; true
             (let (index)
               (cl-loop for key being the hash-keys of search_ins using (hash-values val)
